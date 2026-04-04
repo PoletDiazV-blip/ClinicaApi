@@ -9,7 +9,7 @@ public class Usuario {
     private String correo;
     private String password; // Aquí se guardará el Hash de BCrypt
     private String rol;
-
+    private int id_especifico;
     // 1. CONSTRUCTOR VACÍO (Indispensable para que el Backend lea el JSON de Postman)
     public Usuario() {}
 
@@ -32,4 +32,6 @@ public class Usuario {
     public void setCorreo(String correo) { this.correo = correo; }
     public void setPassword(String password) { this.password = password; }
     public void setRol(String rol) { this.rol = rol; }
+    public int getId_especifico() { return id_especifico; }
+    public void setId_especifico(int id_especifico) { this.id_especifico = id_especifico; }
 }

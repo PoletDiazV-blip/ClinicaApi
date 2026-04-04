@@ -44,7 +44,7 @@ public class DatabaseConfig {
 
             // Prueba de fuego: Validar conexión a la nube
             try (Connection testConn = dataSource.getConnection()) {
-                logger.info("CONEXIÓN EXITOSA ClinicApp a Aiven");
+                logger.info("CONEXION EXITOSA ClinicApp a Aiven");
             }
 
         } catch (SQLException e) {

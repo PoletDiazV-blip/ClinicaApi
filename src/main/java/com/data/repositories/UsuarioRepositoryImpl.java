@@ -13,12 +13,31 @@ public class UsuarioRepositoryImpl implements IUsuarioRepository {
 
     @Override
     public Usuario buscarPorCorreo(String correo) {
-        String sql = "SELECT * FROM usuarios WHERE correo = ?";
+        // Unimos las 3 tablas con LEFT JOIN para no perder datos
+        String sql = "SELECT u.*, p.id_paciente, d.id_doctor " +
+                "FROM usuarios u " +
+                "LEFT JOIN pacientes p ON u.id_usuario = p.id_usuario " +
+                "LEFT JOIN doctores d ON u.id_usuario = d.id_usuario " +
+                "WHERE u.correo = ?";
+
         try (Connection conn = DatabaseConfig.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, correo);
             try (ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) return mapearUsuario(rs);
+                if (rs.next()) {
+                    Usuario u = mapearUsuario(rs);
+
+                    // Si el registro tiene id_paciente, lo guardamos
+                    if (rs.getObject("id_paciente") != null) {
+                        u.setId_especifico(rs.getInt("id_paciente"));
+                    }
+                    // Si tiene id_doctor, lo guardamos también
+                    else if (rs.getObject("id_doctor") != null) {
+                        u.setId_especifico(rs.getInt("id_doctor"));
+                    }
+
+                    return u;
+                }
             }
         } catch (SQLException e) { logger.error("Error buscarPorCorreo: {}", e.getMessage()); }
         return null;

@@ -9,8 +9,29 @@ import java.util.List;
 public class DoctorRepositoryImpl {
 
     /**
-     * LISTAR TODOS LOS DOCTORES (NUEVO)
-     * Usado por el paciente para ver las cards en doctores.html
+     * OBTENER ID_DOCTOR POR ID_USUARIO
+     * Crucial para el Login: Vincula la cuenta de 'usuarios' con el perfil en 'doctores'.
+     */
+    public int obtenerIdDoctorPorUsuario(int id_usuario) {
+        String sql = "SELECT id_doctor FROM doctores WHERE id_usuario = ?";
+        try (Connection conn = DatabaseConfig.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, id_usuario);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt("id_doctor");
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error al vincular Usuario con Doctor: " + e.getMessage());
+        }
+        return -1; // Retorna -1 si no existe el registro
+    }
+
+    /**
+     * LISTAR TODOS LOS DOCTORES
+     * Usado por el paciente para ver las tarjetas de doctores.
      */
     public List<Doctor> listarTodos() {
         List<Doctor> lista = new ArrayList<>();
@@ -29,7 +50,6 @@ public class DoctorRepositoryImpl {
                 d.setBiografia(rs.getString("biografia"));
                 lista.add(d);
             }
-            System.out.println("DEBUG: Se cargaron " + lista.size() + " doctores.");
         } catch (SQLException e) {
             System.err.println("Error al listar doctores: " + e.getMessage());
         }
@@ -37,34 +57,8 @@ public class DoctorRepositoryImpl {
     }
 
     /**
-     * ACTUALIZAR PERFIL COMPLETO
-     * Guarda datos personales y profesionales.
-     */
-    public boolean actualizarPerfilCompleto(Doctor doctor) {
-        String sql = "UPDATE doctores SET nombre = ?, edad = ?, sexo = ?, especialidad = ?, cedula = ?, telefono = ?, correo = ?, biografia = ? WHERE id_doctor = ?";
-
-        try (Connection conn = DatabaseConfig.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-
-            stmt.setString(1, doctor.getNombre());
-            stmt.setInt(2, doctor.getEdad());
-            stmt.setString(3, doctor.getSexo());
-            stmt.setString(4, doctor.getEspecialidad());
-            stmt.setString(5, doctor.getCedula());
-            stmt.setString(6, doctor.getTelefono());
-            stmt.setString(7, doctor.getCorreo());
-            stmt.setString(8, doctor.getBiografia());
-            stmt.setInt(9, doctor.getId_doctor());
-
-            return stmt.executeUpdate() > 0;
-        } catch (SQLException e) {
-            System.err.println("Error en SQL al actualizar doctor: " + e.getMessage());
-            return false;
-        }
-    }
-
-    /**
      * OBTENER DOCTOR POR ID
+     * Carga el perfil completo del doctor para editarlo.
      */
     public Doctor obtenerDoctorPorId(int id_doctor) {
         String sql = "SELECT * FROM doctores WHERE id_doctor = ?";
@@ -92,5 +86,33 @@ public class DoctorRepositoryImpl {
             System.err.println("Error al obtener doctor: " + e.getMessage());
         }
         return null;
+    }
+
+    /**
+     * ACTUALIZAR PERFIL COMPLETO
+     * Guarda los cambios realizados en la pantalla de Perfil e Info Profesional.
+     */
+    public boolean actualizarPerfilCompleto(Doctor doctor) {
+        String sql = "UPDATE doctores SET nombre = ?, edad = ?, sexo = ?, especialidad = ?, " +
+                "cedula = ?, telefono = ?, correo = ?, biografia = ? WHERE id_doctor = ?";
+
+        try (Connection conn = DatabaseConfig.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, doctor.getNombre());
+            stmt.setInt(2, doctor.getEdad());
+            stmt.setString(3, doctor.getSexo());
+            stmt.setString(4, doctor.getEspecialidad());
+            stmt.setString(5, doctor.getCedula());
+            stmt.setString(6, doctor.getTelefono());
+            stmt.setString(7, doctor.getCorreo());
+            stmt.setString(8, doctor.getBiografia());
+            stmt.setInt(9, doctor.getId_doctor());
+
+            return stmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            System.err.println("Error en SQL al actualizar doctor: " + e.getMessage());
+            return false;
+        }
     }
 }
